@@ -1,0 +1,13 @@
+
+# Archivos de IntelliJ IDEA
+.idea/
+*.iml
+
+# Archivos temporales
+*.log
+*.tmp
+
+# Variables de entorno privadas
+.env
+.env.*
+!.env.example
