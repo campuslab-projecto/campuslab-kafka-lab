@@ -65,3 +65,69 @@ Después de reiniciar el broker, las nueve réplicas volvieron a sincronizarse.
 Este entorno corresponde a un laboratorio local independiente del despliegue de CampusLab en AWS.
 
 Los puertos 19092, 19093 y 19094 no deben estar ocupados por otro clúster Kafka local al iniciar este laboratorio.
+
+## Integración con microservicios
+
+El clúster Kafka se integró con los siguientes microservicios de CampusLab en un entorno de pruebas Docker independiente:
+
+| Microservicio | Puerto local | Función |
+|---|---|---|
+| MS Bookings | 18081 | Publica eventos de reservas y ocupación |
+| MS Audit | 18084 | Consume y registra eventos de auditoría |
+| MS Report | 18085 | Consume eventos para generar indicadores |
+| MS Kafka Admin | 18086 | Permite consultar y administrar tópicos |
+
+Los servicios se conectan a los tres brokers mediante la red Docker `campuslab-kafka-lab_default`.
+
+### Tópicos principales
+
+- `campuslab.booking.events`: eventos del ciclo de vida de reservas.
+- `campuslab.occupancy.events`: eventos de ocupación de recursos.
+
+Ambos tópicos utilizan:
+
+- 3 particiones.
+- Factor de replicación 3.
+- `min.insync.replicas=2`.
+- Retención de 7 días.
+- Política de limpieza `delete`.
+
+### Grupos consumidores
+
+- `campuslab-audit-group`: utilizado por MS Audit.
+- `campuslab-report-group`: utilizado por MS Report.
+
+## Verificaciones automatizadas mediante scripts
+
+Desde PowerShell, dentro de la carpeta del proyecto, ejecutar:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\verificar-kafka.ps1
+```
+
+Este script muestra los tópicos disponibles, la configuración de los tópicos principales y los grupos consumidores.
+
+Para revisar los offsets y el retraso de consumo:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\verificar-consumidores.ps1
+```
+
+Ambos scripts requieren Docker Desktop y el clúster Kafka en ejecución. Son comandos de consulta y no modifican mensajes ni tópicos.
+
+## Pruebas de integración realizadas
+
+En el entorno local se comprobó:
+
+1. Publicación de 5 eventos del ciclo de vida de una reserva.
+2. Publicación de 2 eventos de ocupación.
+3. Consumo de eventos mediante MS Audit y MS Report.
+4. Consulta de indicadores en MS Report, con 7 eventos registrados.
+5. Verificación de los grupos consumidores, con LAG 0 en las particiones con eventos procesados.
+6. Persistencia y recuperación del consumo después del reinicio de servicios.
+7. Funcionamiento de Kafka Admin para crear, consultar y eliminar tópicos de demostración.
+8. Manejo de tópicos duplicados mediante HTTP 409 Conflict.
+
+Kafka Admin configura `min.insync.replicas=1` para los tópicos de demostración creados con una réplica. Esta configuración no reemplaza el valor 2 utilizado por los tópicos principales.
+
+Las pruebas descritas corresponden al entorno local de la EP5, no a un despliegue productivo.
