@@ -1,0 +1,18 @@
+services:
+  kafka1:
+    ports: !override
+      - "${AWS_KAFKA_PRIVATE_IP:?Configurar AWS_KAFKA_PRIVATE_IP}:19092:9092"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka1:29092,EXTERNAL://${AWS_KAFKA_PRIVATE_IP:?Configurar AWS_KAFKA_PRIVATE_IP}:19092"
+
+  kafka2:
+    ports: !override
+      - "${AWS_KAFKA_PRIVATE_IP:?Configurar AWS_KAFKA_PRIVATE_IP}:19093:9092"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka2:29092,EXTERNAL://${AWS_KAFKA_PRIVATE_IP:?Configurar AWS_KAFKA_PRIVATE_IP}:19093"
+
+  kafka3:
+    ports: !override
+      - "${AWS_KAFKA_PRIVATE_IP:?Configurar AWS_KAFKA_PRIVATE_IP}:19094:9092"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka3:29092,EXTERNAL://${AWS_KAFKA_PRIVATE_IP:?Configurar AWS_KAFKA_PRIVATE_IP}:19094"
