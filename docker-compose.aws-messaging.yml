@@ -1,0 +1,20 @@
+﻿services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: campuslab-rabbitmq-aws
+    ports:
+      - "${AWS_KAFKA_PRIVATE_IP:?Configurar AWS_KAFKA_PRIVATE_IP}:5672:5672"
+      - "127.0.0.1:15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "${AWS_RABBITMQ_USERNAME:?Configurar AWS_RABBITMQ_USERNAME}"
+      RABBITMQ_DEFAULT_PASS: "${AWS_RABBITMQ_PASSWORD:?Configurar AWS_RABBITMQ_PASSWORD}"
+    volumes:
+      - rabbitmq_aws_data:/var/lib/rabbitmq
+    restart: unless-stopped
+
+  kafka-ui:
+    profiles:
+      - tools
+
+volumes:
+  rabbitmq_aws_data:
